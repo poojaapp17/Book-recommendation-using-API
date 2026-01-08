@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Book Recommendation</title>
+
+    <!-- Embedded CSS -->
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            text-align: center;
+            padding: 20px;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+        }
+
+        input {
+            padding: 10px;
+            width: 300px;
+            max-width: 90%;
+        }
+
+        button {
+            padding: 10px 15px;
+            cursor: pointer;
+            margin-left: 5px;
+        }
+
+        #books {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .book {
+            background: white;
+            width: 250px;
+            margin: 10px;
+            padding: 10px;
+            text-align: left;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            border-radius: 5px;
+        }
+
+        .book img {
+            width: 100%;
+            height: auto;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>📚 BOOK RECOMMENDATION – ENTER YOUR FAVOURITE GENRE</h1>
+
+    <input type="text" id="query"
+        placeholder="Enter genre or interest (e.g. mystery, AI, romance)">
+    <button onclick="getBooks()">Get Recommendations</button>
+
+    <div id="books"></div>
+
+    <!-- Embedded JavaScript -->
+    <script>
+        async function getBooks() {
+            const query = document.getElementById("query").value;
+
+            if (!query) {
+                alert("Please enter a genre or interest");
+                return;
+            }
+
+            const url = `https://www.googleapis.com/books/v1/volumes?q=${query}`;
+
+            try {
+                const res = await fetch(url);
+                const data = await res.json();
+                displayBooks(data.items || []);
+            } catch (error) {
+                console.error("Error fetching books:", error);
+            }
+        }
+
+        function displayBooks(books) {
+            const container = document.getElementById("books");
+            container.innerHTML = "";
+
+            if (books.length === 0) {
+                container.innerHTML = "<p>No books found.</p>";
+                return;
+            }
+
+            books.slice(0, 10).forEach(book => {
+                const info = book.volumeInfo;
+
+                const bookDiv = document.createElement("div");
+                bookDiv.className = "book";
+
+                bookDiv.innerHTML = `
+                    <img src="${info.imageLinks ? info.imageLinks.thumbnail : ''}" alt="Book Cover">
+                    <h3>${info.title || "No Title"}</h3>
+                    <p><b>Author:</b> ${info.authors ? info.authors.join(", ") : "N/A"}</p>
+                    <p><b>Rating:</b> ${info.averageRating || "N/A"}</p>
+                    <p>${info.description ? info.description.substring(0, 100) + "..." : "No description available"}</p>
+                `;
+
+                container.appendChild(bookDiv);
+            });
+        }
+    </script>
+
+</body>
+</html>
